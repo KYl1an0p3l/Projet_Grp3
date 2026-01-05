@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Éditeur de Pages</title>
+    <style>
+        /* --- 1. CSS : Le Style --- */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Barre d'outils en haut */
+        #toolbar {
+            background: #f0f0f0;
+            padding: 10px;
+            border-bottom: 2px solid #ccc;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: 1px solid #999;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        button:hover { background: #e0e0e0; }
+        button.active { background: #bfdbfe; border-color: #3b82f6; }
+
+        /* Conteneur principal */
+        #main-container {
+            display: flex;
+            flex: 1;
+            position: relative;
+        }
+
+        /* Zone de travail (Papier millimétré) */
+        #workspace {
+            flex: 1;
+            position: relative;
+            background-color: #fff;
+            /* Effet papier quadrillé comme sur ton dessin */
+            background-image: 
+                linear-gradient(#e5e5e5 1px, transparent 1px),
+                linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        /* Calque SVG pour les flèches (en arrière-plan) */
+        #connections-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Laisse passer les clics vers le workspace */
+            z-index: 0;
+        }
+
+        /* Style des flèches */
+        line {
+            stroke: #333;
+            stroke-width: 2;
+        }
+        marker { fill: #333; }
+
+        /* Les Nœuds (Pages) */
+        .node {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: white;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            z-index: 1;
+            user-select: none;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        .node.selected {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Sidebar à droite */
+        #sidebar {
+            width: 250px;
+            background: #f9f9f9;
+            border-left: 2px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        input, textarea {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        h3 { margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="toolbar">
+        <button onclick="addNode()">+ Ajouter Nœud</button>
+        <button id="btn-link" onclick="toggleLinkMode()">🔗 Mode Liaison (OFF)</button>
+        <button onclick="deleteSelected()">🗑️ Supprimer Nœud</button>
+    </div>
+
+    <div id="main-container">
+        <div id="workspace" onclick="handleWorkspaceClick(event)">
+            <svg id="connections-layer">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                    refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" />
+                    </marker>
+                </defs>
+            </svg>
+            </div>
+
+        <div id="sidebar">
+            <h3>Infos</h3>
+            <button onclick="saveData()">Sauvegarder</button>
+            
+            <div class="sidebar-group">
+                <label>Nom :</label>
+                <input type="text" id="input-name" placeholder="..." oninput="updateNodeData()">
+            </div>
+
+            <div class="sidebar-group">
+                <label>Description :</label>
+                <textarea id="input-desc" rows="4" placeholder="..." oninput="updateNodeData()"></textarea>
+            </div>
+
+            <button onclick="alert('Fonctionnalité future : Modifier le contenu')">Modifier la page</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- 2. JavaScript : La Logique --- */
+        
+        let nodes = []; // Liste des données des pages
+        let links = []; // Liste des liens {from: id, to: id}
+        let selectedNodeId = null;
+        
+        // Variables pour le mode liaison
+        let isLinkMode = false;
+        let linkStartNodeId = null;
+
+        const workspace = document.getElementById('workspace');
+        const connectionsLayer = document.getElementById('connections-layer');
+
+        // 1. Ajouter un nœud (au centre ou aléatoire)
+        function addNode() {
+            const id = Date.now(); // ID unique simple
+            const node = {
+                id: id,
+                name: "Nouvelle Page",
+                desc: "",
+                x: 50 + Math.random() * 200,
+                y: 50 + Math.random() * 200
+            };
+            nodes.push(node);
+            renderNodes();
+        }
+
+        // 2. Affichage des nœuds (Rendering)
+        function renderNodes() {
+            // On garde le SVG, on nettoie juste les divs nœuds
+            const existingNodes = document.querySelectorAll('.node');
+            existingNodes.forEach(el => el.remove());
+
+            nodes.forEach(node => {
+                const el = document.createElement('div');
+                el.className = 'node';
+                if (node.id === selectedNodeId) el.classList.add('selected');
+                
+                // Style visuel "Trépied" simplifié (juste une boite pour l'instant)
+                el.style.left = node.x + 'px';
+                el.style.top = node.y + 'px';
+                el.innerHTML = `<strong>${node.name}</strong>`;
+                
+                // Événement clic sur le nœud
+                el.onclick = (e) => {
+                    e.stopPropagation(); // Empêche le clic sur le workspace
+                    handleNodeClick(node.id);
+                };
+
+                // (Optionnel) Ajout basique de Drag & Drop pour placer les éléments
+                el.onmousedown = (e) => startDrag(e, node);
+
+                workspace.appendChild(el);
+            });
+
+            renderLinks();
+        }
+
+        // 3. Gestion des clics sur les nœuds
+        function handleNodeClick(id) {
+            if (isLinkMode) {
+                // Logique de création de lien en 2 clics
+                if (linkStartNodeId === null) {
+                    // Premier clic : Point de départ
+                    linkStartNodeId = id;
+                    alert("Départ sélectionné. Cliquez sur la page cible.");
+                } else {
+                    // Deuxième clic : Cible
+                    if (linkStartNodeId !== id) {
+                        links.push({ from: linkStartNodeId, to: id });
+                        renderLinks();
+                        linkStartNodeId = null; // Reset
+                        toggleLinkMode(); // Désactiver le mode après création (optionnel)
+                    } else {
+                        alert("Impossible de lier une page à elle-même.");
+                        linkStartNodeId = null;
+                    }
+                }
+            } else {
+                // Mode normal : Sélection pour édition sidebar
+                selectedNodeId = id;
+                renderNodes(); // Pour mettre à jour la classe .selected
+                populateSidebar(id);
+            }
+        }
+
+        // 4. Remplir la sidebar
+        function populateSidebar(id) {
+            const node = nodes.find(n => n.id === id);
+            if (node) {
+                document.getElementById('input-name').value = node.name;
+                document.getElementById('input-desc').value = node.desc;
+            }
+        }
+
+        // 5. Mise à jour des données depuis la sidebar
+        function updateNodeData() {
+            if (!selectedNodeId) return;
+            const node = nodes.find(n => n.id === selectedNodeId);
+            node.name = document.getElementById('input-name').value;
+            node.desc = document.getElementById('input-desc').value;
+            renderNodes(); // Mettre à jour le texte dans la boite
+        }
+
+        // 6. Gestion du Mode Liaison
+        function toggleLinkMode() {
+            isLinkMode = !isLinkMode;
+            linkStartNodeId = null; // Reset si on change de mode
+            const btn = document.getElementById('btn-link');
+            btn.innerText = isLinkMode ? "🔗 Mode Liaison (ON)" : "🔗 Mode Liaison (OFF)";
+            btn.classList.toggle('active');
+        }
+
+        // 7. Dessiner les flèches (SVG)
+        function renderLinks() {
+            // Nettoyer les lignes existantes (sauf le marker defs)
+            const lines = connectionsLayer.querySelectorAll('line');
+            lines.forEach(line => line.remove());
+
+            links.forEach(link => {
+                const nodeA = nodes.find(n => n.id === link.from);
+                const nodeB = nodes.find(n => n.id === link.to);
+
+                if (nodeA && nodeB) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    
+                    // Calcul du centre des boites (Largeur 120, Hauteur 80)
+                    const x1 = nodeA.x + 60; 
+                    const y1 = nodeA.y + 40;
+                    const x2 = nodeB.x + 60;
+                    const y2 = nodeB.y + 40;
+
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('marker-end', 'url(#arrowhead)'); // Pointe de flèche
+
+                    connectionsLayer.appendChild(line);
+                }
+            });
+        }
+
+        // 8. Supprimer un nœud
+        function deleteSelected() {
+            if (!selectedNodeId) return;
+            // Retirer le nœud
+            nodes = nodes.filter(n => n.id !== selectedNodeId);
+            // Retirer les liens associés
+            links = links.filter(l => l.from !== selectedNodeId && l.to !== selectedNodeId);
+            
+            selectedNodeId = null;
+            document.getElementById('input-name').value = "";
+            document.getElementById('input-desc').value = "";
+            renderNodes();
+        }
+
+        function saveData() {
+            console.log("Sauvegarde JSON:", JSON.stringify({nodes, links}));
+            alert("Données affichées dans la console (F12)");
+        }
+
+        function handleWorkspaceClick(e) {
+            // Si on clique dans le vide, on désélectionne
+            if (e.target.id === 'workspace' || e.target.id === 'connections-layer') {
+                selectedNodeId = null;
+                renderNodes();
+            }
+        }
+
+        // --- Petit bonus : Drag and Drop basique pour bouger les boites ---
+        function startDrag(e, node) {
+            if(isLinkMode) return; // Pas de drag en mode liaison
+
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startNodeX = node.x;
+            const startNodeY = node.y;
+
+            function onMouseMove(ev) {
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                node.x = startNodeX + dx;
+                node.y = startNodeY + dy;
+                renderNodes(); // Met à jour position + flèches
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        // Init : Un nœud Home au départ
+        nodes.push({id: 1, name: "Home", desc: "Page d'accueil", x: 300, y: 100});
+        renderNodes();
+
+    </script>
+</body>
+</html>
