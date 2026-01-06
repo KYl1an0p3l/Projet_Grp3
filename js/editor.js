@@ -18,7 +18,7 @@ const pannelNeedsForId = {
     }
 }
 
-function createPannelFromId(elemId){
+function createPannelFromId(elemId, edited_element){
         //On supprime un éventuel ancien panneau
         const oldPannel = document.getElementById("config_panel");
         if(oldPannel) oldPannel.remove();
@@ -63,15 +63,29 @@ function createPannelFromId(elemId){
             const addButton = document.createElement("button");
             newPannel.appendChild(addButton);
             addButton.addEventListener("click", (event) => {
+                let newElement = null;
                 if(elemId === "textarea"){
-                    const added_textarea = document.createElement("p");
-                    canvas.appendChild(added_textarea);
-                    added_textarea.style.position = "absolute";
-                    added_textarea.style.left = Number(document.getElementById("posX").value); + "px";
-                    added_textarea.style.top = Number(document.getElementById("posY").value); + "px";
-                    added_textarea.textContent = document.getElementById("text").value;
-                    added_textarea.style.zIndex = Number(document.getElementById("zindex").value); + "px";
+                    newElement = document.createElement("p");
+                    newElement.textContent = document.getElementById("text").value;
                 }
+                if(edited_element){
+                    canvas.replaceChild(newElement, edited_element);
+                }
+                else{
+                    canvas.appendChild(newElement);
+                }
+                newElement.style.position = "absolute";
+                newElement.style.left = Number(document.getElementById("posX").value) + "px";
+                newElement.style.top = Number(document.getElementById("posY").value) + "px";
+                newElement.style.zIndex = Number(document.getElementById("zindex").value);
+                newElement.classList.add("placed_element");
+                newPannel.classList.remove("open");
+                document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
+                document.querySelectorAll(".placed_element").forEach(elem => elem.style.border = "white solid 2px");
+                newElement.addEventListener("click", (event) => {
+                    newElement.style.border = "gray solid 2px";
+                    createPannelFromId(elemId, newElement);
+                });
             });
         setTimeout(() => {
             newPannel.classList.add("open");
@@ -82,6 +96,7 @@ function createPannelFromId(elemId){
             closeButton.style.top = 2+"vh"
             closeButton.addEventListener("click", (event)=>{
                 newPannel.classList.remove("open");
+                document.querySelectorAll(".placed_element").forEach(elem => elem.style.border = "white solid 2px");
                 document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
             });
         }, 10);
@@ -96,8 +111,7 @@ addable_content.forEach(element => {
         targeted_element.classList.add("active");
 
         const img = targeted_element.querySelector("img");
-        createPannelFromId(img.id);
+        createPannelFromId(img.id, null);
         })
-        
+});
 
-    });

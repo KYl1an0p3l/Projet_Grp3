@@ -109,3 +109,11 @@ footer{
     background-color : orange;
     z-index : 0;
 }
+
+.placed_element{
+    border : white solid 2px;
+}
+
+.placed_element:hover{
+    border : lightgray solid 2px;
+}
