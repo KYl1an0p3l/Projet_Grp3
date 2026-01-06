@@ -128,6 +128,7 @@
         <button onclick="addNode()">+ Ajouter Nœud</button>
         <button id="btn-link" onclick="toggleLinkMode()">🔗 Mode Liaison (OFF)</button>
         <button onclick="deleteSelected()">🗑️ Supprimer Nœud</button>
+        <button id="btn_del">🗑️ Supprimer Tout</button>
     </div>
 
     <div id="main-container">
@@ -145,6 +146,8 @@
         <div id="sidebar">
             <h3>Infos</h3>
             <button onclick="saveData()">Sauvegarder</button>
+            <button type='file' onclick="importData()">Importer</button>
+            <input type="file" id="file-input" style="display:none;">
             
             <div class="sidebar-group">
                 <label>Nom :</label>
@@ -177,6 +180,7 @@
         // 1. Ajouter un nœud (au centre ou aléatoire)
         function addNode() {
             const id = Date.now(); // ID unique simple
+            console.log("id du noeud créé : "+id);
             const node = {
                 id: id,
                 name: "Nouvelle Page",
@@ -210,8 +214,11 @@
                     handleNodeClick(node.id);
                 };
 
-                // (Optionnel) Ajout basique de Drag & Drop pour placer les éléments
-                el.onmousedown = (e) => startDrag(e, node);
+                //Ajout basique de Drag & Drop pour placer les éléments
+                el.onmousedown = (e) =>{
+                    e.stopPropagation();
+                    startDrag(e, node);
+                };
 
                 workspace.appendChild(el);
             });
@@ -226,14 +233,14 @@
                 if (linkStartNodeId === null) {
                     // Premier clic : Point de départ
                     linkStartNodeId = id;
-                    alert("Départ sélectionné. Cliquez sur la page cible.");
+                    //alert("Départ sélectionné. Cliquez sur la page cible.");
                 } else {
                     // Deuxième clic : Cible
                     if (linkStartNodeId !== id) {
                         links.push({ from: linkStartNodeId, to: id });
                         renderLinks();
                         linkStartNodeId = null; // Reset
-                        toggleLinkMode(); // Désactiver le mode après création (optionnel)
+                        //toggleLinkMode(); // Désactiver le mode après création (optionnel)
                     } else {
                         alert("Impossible de lier une page à elle-même.");
                         linkStartNodeId = null;
@@ -360,7 +367,73 @@
         // Init : Un nœud Home au départ
         nodes.push({id: 1, name: "Home", desc: "Page d'accueil", x: 300, y: 100});
         renderNodes();
+        
+        let workspaceDragged=false;
+        let pos0mouseX=0;
+        let pos0mousey=0;
 
+
+        workspace.addEventListener('mousedown',(event)=>{
+            workspaceDragged=true;
+            pos0mouseX=event.clientX;
+            pos0mouseY=event.clientY;
+        });
+
+        workspace.addEventListener('mouseup',(event)=>{
+            workspaceDragged=false;
+        });
+
+        let bgX=0;
+        let bgY=0;
+
+        workspace.addEventListener('mousemove',(event)=>{
+            workspace.style.cursor = workspaceDragged ? "grabbing" : "grab";
+            if(!workspaceDragged) return;
+            console.log("drag du workspace en cours");
+
+            let dx=event.clientX-pos0mouseX;
+            let dy=event.clientY-pos0mouseY;
+            
+            bgX+=dx;
+            bgY+=dy;
+
+            workspace.style.backgroundPositionX=`${bgX}px`;
+            workspace.style.backgroundPositionY=`${bgY}px`;
+
+            nodes.forEach((node)=>{
+                node.x+=dx;
+                node.y+=dy;                
+            });
+
+            pos0mouseX=event.clientX;
+            pos0mouseY=event.clientY;
+
+            
+            renderNodes();
+            renderLinks();
+        });
+
+
+        let btn_del=document.getElementById("btn_del");
+        btn_del.addEventListener("click", (event)=>{
+            nodes=[];
+            links=[];
+            selectedNodeId = null;
+            
+            renderNodes();
+            renderLinks();
+        });
+        
+
+        //Fonction permettant d'importer un arbre grâce à un fichier json
+        let input_import=document.getElementById('file-input');
+        function importData(){
+            input_import.click();
+
+            /////A COMPLETER //////////////////////////////////////////////////////////////////////////
+
+        }
+        
     </script>
 </body>
 </html>
