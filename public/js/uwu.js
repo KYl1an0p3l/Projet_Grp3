@@ -1,169 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Éditeur de Pages</title>
-    <style>
-        /* --- 1. CSS : Le Style --- */
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
 
-        /* Barre d'outils en haut */
-        #toolbar {
-            background: #f0f0f0;
-            padding: 10px;
-            border-bottom: 2px solid #ccc;
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            padding: 8px 15px;
-            cursor: pointer;
-            border: 1px solid #999;
-            background: #fff;
-            border-radius: 4px;
-        }
-
-        button:hover { background: #e0e0e0; }
-        button.active { background: #bfdbfe; border-color: #3b82f6; }
-
-        /* Conteneur principal */
-        #main-container {
-            display: flex;
-            flex: 1;
-            position: relative;
-        }
-
-        /* Zone de travail (Papier millimétré) */
-        #workspace {
-            flex: 1;
-            position: relative;
-            background-color: #fff;
-            /* Effet papier quadrillé comme sur ton dessin */
-            background-image: 
-                linear-gradient(#e5e5e5 1px, transparent 1px),
-                linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
-            background-size: 20px 20px;
-            overflow: hidden;
-        }
-
-        /* Calque SVG pour les flèches (en arrière-plan) */
-        #connections-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Laisse passer les clics vers le workspace */
-            z-index: 0;
-        }
-
-        /* Style des flèches */
-        line {
-            stroke: #333;
-            stroke-width: 2;
-        }
-        marker { fill: #333; }
-
-        /* Les Nœuds (Pages) */
-        .node {
-            position: absolute;
-            width: 120px;
-            height: 80px;
-            background: white;
-            border: 2px solid #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            cursor: pointer;
-            z-index: 1;
-            user-select: none;
-            box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
-            border-radius: 4px;
-        }
-
-        .node.selected {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
-        }
-
-        /* Sidebar à droite */
-        #sidebar {
-            width: 250px;
-            background: #f9f9f9;
-            border-left: 2px solid #ccc;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .sidebar-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        input, textarea {
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        h3 { margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-
-    </style>
-</head>
-<body>
-
-    <div id="toolbar">
-        <button onclick="addNode()">+ Ajouter Nœud</button>
-        <button id="btn-link" onclick="toggleLinkMode()">🔗 Mode Liaison (OFF)</button>
-        <button onclick="deleteSelected()">🗑️ Supprimer Nœud</button>
-        <button id="btn_del">🗑️ Supprimer Tout</button>
-    </div>
-
-    <div id="main-container">
-        <div id="workspace" onclick="handleWorkspaceClick(event)">
-            <svg id="connections-layer">
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                    refX="10" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" />
-                    </marker>
-                </defs>
-            </svg>
-            </div>
-
-        <div id="sidebar">
-            <h3>Infos</h3>
-            <button onclick="saveData()">Sauvegarder</button>
-            <button type='file' onclick="importData()">Importer</button>
-            <input type="file" id="file-input" style="display:none;">
-            
-            <div class="sidebar-group">
-                <label>Nom :</label>
-                <input type="text" id="input-name" placeholder="..." oninput="updateNodeData()">
-            </div>
-
-            <div class="sidebar-group">
-                <label>Description :</label>
-                <textarea id="input-desc" rows="4" placeholder="..." oninput="updateNodeData()"></textarea>
-            </div>
-
-            <button onclick="alert('Fonctionnalité future : Modifier le contenu')">Modifier la page</button>
-        </div>
-    </div>
-
-    <script>
         /* --- 2. JavaScript : La Logique --- */
         
         let nodes = []; // Liste des données des pages
@@ -431,9 +266,26 @@
             input_import.click();
 
             /////A COMPLETER //////////////////////////////////////////////////////////////////////////
-
         }
+
+
+
+
+async function saveData() {
+    const projectData = { nodes, links }; // Récupère tes données actuelles
+
+    try {
+        const response = await fetch('/save-project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(projectData)
+        });
         
-    </script>
-</body>
-</html>
+        if (response.ok) {
+            alert("L'arborescence a été sauvegardée sur ton disque !");
+        }
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde :", error);
+    }
+}
+        
