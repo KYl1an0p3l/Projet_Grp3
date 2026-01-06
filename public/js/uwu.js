@@ -54,6 +54,29 @@
                     e.stopPropagation();
                     startDrag(e, node);
                 };
+                
+                //Lorsqu'on double clique sur un noeud alors une page html est créée
+                el.ondblclick=(e)=>{
+                    e.stopPropagation();
+                    console.log("Noeud double cliqué : "+node.id);
+
+                    fetch('/create-page', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id:node.id,
+                            page_content:"Voici le contenu de la page"
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.status);
+                        if (data.url) {
+                            window.location.href = data.url; 
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+                }
 
                 workspace.appendChild(el);
             });
@@ -266,7 +289,6 @@
 
             /////A COMPLETER //////////////////////////////////////////////////////////////////////////
         }
-
 
 
 
