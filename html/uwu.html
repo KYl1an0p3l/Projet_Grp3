@@ -389,7 +389,6 @@
         workspace.addEventListener('mousemove',(event)=>{
             workspace.style.cursor = workspaceDragged ? "grabbing" : "grab";
             if(!workspaceDragged) return;
-            console.log("drag du workspace en cours");
 
             let dx=event.clientX-pos0mouseX;
             let dy=event.clientY-pos0mouseY;
