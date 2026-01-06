@@ -25,9 +25,10 @@ header{
     overflow-y :hidden;
 }
 
-.header_element{
+.header_element {
     border : white solid 2px;
     display : flex;
+    flex-direction: column; /* vertical */
     justify-content: center;
     align-items: center;
     padding : auto;
@@ -35,21 +36,20 @@ header{
     height: 11.5vh;
     width : 10vw;
     z-index : 2;
+    cursor: pointer;
 }
-
-.header_element:hover{
-    border : lightgray solid 2px;
-}
-
-.header_element.active {
-    border: 2px solid darkgray;
-}
-
 
 .header_element img {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 80%; /* laisser de la place pour le texte */
     object-fit: contain;
+}
+
+.header_label {
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    text-align: center;
+    color: black;
 }
 
 
