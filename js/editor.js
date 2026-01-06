@@ -1,5 +1,6 @@
 const addable_content = document.querySelectorAll(".header_element");
 const main = document.querySelector("main");
+const canvas = document.getElementById("main_center");
 const panel = document.getElementById("config_panel");
 const panelTitle = document.getElementById("panel_title");
 
@@ -9,6 +10,8 @@ const pannelNeedsForId = {
         fields: [
             {name :"posX", label:"X",type:"number",placeholder:"Position X en pixel...",default:0},
             {name : "posY", label:"Y",type:"number",placeholder:"Position Y en pixel...",default:0},
+            {name :"height", label:"Hauteur",type:"number",placeholder:"Hauteur en pixel...",default:100},
+            {name :"width", label:"Largeur",type:"number",placeholder:"Largeur en pixel...",default:100},
             {name : "text", label:"Texte",type:"textarea",placeholder:"Lorem ipsum...",default:"Lorem ipsum..."},
             {name : "zindex", label:"Z-Index",type:"number",placeholder:"Plan de l'élément (ex : 0 pour l'arrière plan)...",default:0}
         ]
@@ -57,8 +60,30 @@ function createPannelFromId(elemId){
                 fieldWrapper.appendChild(input);
                 newPannel.appendChild(fieldWrapper);
             });
+            const addButton = document.createElement("button");
+            newPannel.appendChild(addButton);
+            addButton.addEventListener("click", (event) => {
+                if(elemId === "textarea"){
+                    const added_textarea = document.createElement("p");
+                    canvas.appendChild(added_textarea);
+                    added_textarea.style.position = "absolute";
+                    added_textarea.style.left = Number(document.getElementById("posX").value); + "px";
+                    added_textarea.style.top = Number(document.getElementById("posY").value); + "px";
+                    added_textarea.textContent = document.getElementById("text").value;
+                    added_textarea.style.zIndex = Number(document.getElementById("zindex").value); + "px";
+                }
+            });
         setTimeout(() => {
             newPannel.classList.add("open");
+            const closeButton = document.createElement("button");
+            newPannel.appendChild(closeButton);
+            closeButton.style.position = "absolute";
+            closeButton.style.right = 2+"vw"
+            closeButton.style.top = 2+"vh"
+            closeButton.addEventListener("click", (event)=>{
+                newPannel.classList.remove("open");
+                document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
+            });
         }, 10);
 
 }
