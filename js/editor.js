@@ -4,6 +4,7 @@ const canvas = document.getElementById("main_center");
 const panel = document.getElementById("config_panel");
 const panelTitle = document.getElementById("panel_title");
 
+//Tableau récapitulent les champs nécessaires à chaque type d'élément plaçable
 const pannelNeedsForId = {
     "textarea": {
         title: "Configuration - TextArea",
@@ -18,7 +19,8 @@ const pannelNeedsForId = {
     }
 }
 
-function createPannelFromId(elemId){
+//Fonction pour créer un élément plaçable conformément aux choix de l'utilisateur
+function createPannelFromId(elemId, edited_element){
         //On supprime un éventuel ancien panneau
         const oldPannel = document.getElementById("config_panel");
         if(oldPannel) oldPannel.remove();
@@ -26,7 +28,7 @@ function createPannelFromId(elemId){
         const newPannel = document.createElement("div")
         newPannel.id = "config_panel";
         main.appendChild(newPannel);
-        //On créer les champs du panneau de configuration
+        //On créer les champs dans le panneau de configuration
         const title = document.createElement("h3");
         title.textContent = pannelNeedsForId[elemId].title;
         newPannel.appendChild(title);
@@ -60,19 +62,36 @@ function createPannelFromId(elemId){
                 fieldWrapper.appendChild(input);
                 newPannel.appendChild(fieldWrapper);
             });
+            //On créer le bouton pour ajouter l'élément plaçable au canvas
             const addButton = document.createElement("button");
             newPannel.appendChild(addButton);
             addButton.addEventListener("click", (event) => {
+                let newElement = null;
                 if(elemId === "textarea"){
-                    const added_textarea = document.createElement("p");
-                    canvas.appendChild(added_textarea);
-                    added_textarea.style.position = "absolute";
-                    added_textarea.style.left = Number(document.getElementById("posX").value); + "px";
-                    added_textarea.style.top = Number(document.getElementById("posY").value); + "px";
-                    added_textarea.textContent = document.getElementById("text").value;
-                    added_textarea.style.zIndex = Number(document.getElementById("zindex").value); + "px";
+                    newElement = document.createElement("p");
+                    newElement.textContent = document.getElementById("text").value;
                 }
+                if(edited_element){//Si l'élément a été sélectionné pour être réédité, on le remplace
+                    canvas.replaceChild(newElement, edited_element);
+                }
+                else{//Sinon on l'ajoute simplement
+                    canvas.appendChild(newElement);
+                }
+                //Puis on le met en forme et on le place conformément aux choix de l'utilisateur
+                newElement.style.position = "absolute";
+                newElement.style.left = Number(document.getElementById("posX").value) + "px";
+                newElement.style.top = Number(document.getElementById("posY").value) + "px";
+                newElement.style.zIndex = Number(document.getElementById("zindex").value);
+                newElement.classList.add("placed_element");
+                newPannel.classList.remove("open");
+                document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
+                document.querySelectorAll(".placed_element").forEach(elem => elem.style.border = "white solid 2px");
+                newElement.addEventListener("click", (event) => {
+                    newElement.style.border = "gray solid 2px";
+                    createPannelFromId(elemId, newElement);
+                });
             });
+            //Enfin, on créer le bouton servant à fermer le panel, si l'utilisateur ne souhaite plus éditer
         setTimeout(() => {
             newPannel.classList.add("open");
             const closeButton = document.createElement("button");
@@ -82,12 +101,16 @@ function createPannelFromId(elemId){
             closeButton.style.top = 2+"vh"
             closeButton.addEventListener("click", (event)=>{
                 newPannel.classList.remove("open");
+                document.querySelectorAll(".placed_element").forEach(elem => elem.style.border = "white solid 2px");
                 document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
             });
         }, 10);
 
 }
 
+//Les éléments plaçable possibles sont résumés dans la barre en haut de la page,
+// lorsqu'on clique l'un de ces éléments, le pannel s'ouvre pour éditer un
+// élément plaçable du type choisis
 addable_content.forEach(element => {
     element.addEventListener("click", (event) => {
 
@@ -96,8 +119,7 @@ addable_content.forEach(element => {
         targeted_element.classList.add("active");
 
         const img = targeted_element.querySelector("img");
-        createPannelFromId(img.id);
+        createPannelFromId(img.id, null);
         })
-        
-
 });
+
