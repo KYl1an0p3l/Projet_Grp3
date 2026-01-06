@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Éditeur de Pages</title>
+    <link rel="stylesheet" href="../css/uwu.css">
+</head>
+<body>
+
+    <div id="toolbar">
+        <button onclick="addNode()">+ Ajouter Nœud</button>
+        <button id="btn-link" onclick="toggleLinkMode()">🔗 Mode Liaison (OFF)</button>
+        <button onclick="deleteSelected()">🗑️ Supprimer Nœud</button>
+        <button id="btn_del">🗑️ Supprimer Tout</button>
+    </div>
+
+    <div id="main-container">
+        <div id="workspace" onclick="handleWorkspaceClick(event)">
+            <svg id="connections-layer">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                    refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" />
+                    </marker>
+                </defs>
+            </svg>
+            </div>
+
+        <div id="sidebar">
+            <h3>Infos</h3>
+            <button onclick="saveData()">Sauvegarder</button>
+            <button type='file' onclick="importData()">Importer</button>
+            <input type="file" id="file-input" style="display:none;">
+            
+            <div class="sidebar-group">
+                <label>Nom :</label>
+                <input type="text" id="input-name" placeholder="..." oninput="updateNodeData()">
+            </div>
+
+            <div class="sidebar-group">
+                <label>Description :</label>
+                <textarea id="input-desc" rows="4" placeholder="..." oninput="updateNodeData()"></textarea>
+            </div>
+
+            <button onclick="alert('Fonctionnalité future : Modifier le contenu')">Modifier la page</button>
+        </div>
+    </div>
+
+    <script src="../js/uwu.js"></script>
+</body>
+</html>
