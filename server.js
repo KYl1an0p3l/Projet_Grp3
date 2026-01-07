@@ -45,6 +45,30 @@ app.post("/save-page", (req, res) => {
   res.send({ status: "Fichier page créé/mis à jour" });
 });
 
+app.post("/create-page", (req, res) => {
+  const content = `
+    <head>
+        <title>${req.body.title}</title>
+    </head>
+    <h1>${req.body.title}</h1>
+    <p>${req.body.page_content}</p>`;
+  const fileName = `page_${req.body.id}.html`; // Nom unique
+  const filePath = path.join(__dirname + "/pages", fileName); // Chemin vers ton dossier public
+
+  // Écrit physiquement le fichier sur le serveur
+  fs.writeFile(filePath, content, (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send({ status: "Erreur lors de la création" });
+    }
+    // On renvoie l'URL du nouveau fichier au client
+    res.send({
+      status: "Fichier créé",
+      url: `${"/pages/" + fileName}`,
+    });
+  });
+});
+
 // Redirection de la racine vers ton interface principale
 app.get("/", (req, res) => {
   res.redirect("/html/uwu.html");
