@@ -54,37 +54,3 @@ app.listen(3000, () => {
   console.log("🚀 Serveur lancé sur http://localhost:3000");
   console.log("📂 Interface : http://localhost:3000/html/uwu.html");
 });
-
-// Création ou mis à jour de fichier
-app.post("/save-page", (req, res) => {
-  const { id, name, htmlContent } = req.body;
-
-  if (!id || !htmlContent) {
-    return res.status(400).json({ error: "Données manquantes" });
-  }
-
-  const fileName = `${id}.html`;
-  const filePath = path.join(PAGES_DIR, fileName);
-
-  const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>${name || id}</title>
-</head>
-<body>
-${htmlContent}
-</body>
-</html>`;
-
-  // Vérifie si le fichier existe déjà
-  const exists = fs.existsSync(filePath);
-
-  // Écrire seulement ce fichier (aucun autre fichier n’est touché)
-  fs.writeFileSync(filePath, fullHtml);
-
-  res.json({
-    status: exists ? "Fichier mis à jour" : "Fichier créé",
-    file: fileName,
-  });
-});
