@@ -66,7 +66,7 @@
                         body: JSON.stringify({
                             id:node.id,
                             title:node.name,
-                            page_content:"Voici le contenu de la page"
+                            page_content:node.desc
                         })
                     })
                     .then(response => response.json())
@@ -171,6 +171,7 @@
             });
         }
 
+
         // 8. Supprimer un nœud
         function deleteSelected() {
             if (!selectedNodeId) return;
@@ -184,11 +185,11 @@
             document.getElementById('input-desc').value = "";
             renderNodes();
         }
-
+        /*
         function saveData() {
             console.log("Sauvegarde JSON:", JSON.stringify({nodes, links}));
             alert("Données affichées dans la console (F12)");
-        }
+        }*/
 
         function handleWorkspaceClick(e) {
             // Si on clique dans le vide, on désélectionne
@@ -286,26 +287,96 @@
 
         //Fonction permettant d'importer un arbre grâce à un fichier json
         let input_import=document.getElementById('file-input');
+        let div_err_import=document.getElementById("div_err_import");
+        div_err_import.style.visibility='hidden';
+        
         function importData(){
             input_import.click();
-
+            
             /////A COMPLETER //////////////////////////////////////////////////////////////////////////
         }
+        input_import.addEventListener('change', (event)=>{
+            if(input_import.files==null) return;
+
+            const file=input_import.files[0];
+            console.log(file);
+
+            if(!file.name.endsWith('json')){
+                div_err_import.innerHTML=`ATTENTION : Fichier JSON requis`;
+                div_err_import.style.color='red';
+                div_err_import.style.visibility='visible';
+            }
+            else if(file.type !== "application/json"){
+                div_err_import.innerHTML=`ATTENTION : Type de fichier invalide`;
+                div_err_import.style.color='red';
+                div_err_import.style.visibility='visible';
+            }
+            else{
+                div_err_import.innerHTML=`Fichier chargé avec succès !`;
+                div_err_import.style.color='green';
+                div_err_import.style.visibility='visible';
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const data = JSON.parse(e.target.result);
+
+                    // Vérification de structure
+                    if (!data.nodes || !data.links) {
+                        div_err_import.innerHTML=`ATTENTION : Fichier JSON invalide ou corrompu`;
+                        div_err_import.style.color='red';
+                        div_err_import.style.visibility='visible';
+                    }
+                    else{
+                        div_err_import.innerHTML=`Fichier chargé avec succès !`;
+                        div_err_import.style.color='green';
+                        div_err_import.style.visibility='visible';
+
+                        //Récupération et affichage des noeuds et des liens :
+                        nodes=data.nodes;
+                        links=data.links;
+
+                        renderNodes();
+                        renderLinks();
+                    }
+
+            };
 
 
+            reader.readAsText(file);
+
+        });
+
+
+
+let input_project_name=document.getElementById("input_project_name");
+
+let div_err_project_name=document.getElementById("div_err_project_name");
+div_err_project_name.style.color="red";
 
 async function saveData() {
-    const projectData = { nodes, links }; // Récupère tes données actuelles
+
+    console.log(input_project_name.value);
+
+    if(input_project_name.value.length==0){
+        div_err_project_name.innerHTML="Veuillez entrer un nom pour ce projet";
+        return;
+    }
+    let title=input_project_name.value;
+    const projectData = { nodes, links, title}; // Récupère tes données actuelles
 
     try {
         const response = await fetch('/save-project', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(projectData)
+            body: JSON.stringify(projectData),
+            
         });
         
         if (response.ok) {
-            alert("L'arborescence a été sauvegardée sur ton disque !");
+            div_err_project_name.innerHTML="Projet sauvegardé avec succès";
+            div_err_project_name.style.color="green";
         }
     } catch (error) {
         console.error("Erreur lors de la sauvegarde :", error);

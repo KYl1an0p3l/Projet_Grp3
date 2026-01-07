@@ -9,13 +9,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/pages',express.static(path.join(__dirname,'pages')));
 
-
 const PAGES_DIR = path.join(__dirname, 'pages');
 if (!fs.existsSync(PAGES_DIR)) fs.mkdirSync(PAGES_DIR);
 
+
+
 // ROUTE 1 : Sauvegarder l'arborescence
 app.post('/save-project', (req, res) => {
-    fs.writeFileSync('project_state.json', JSON.stringify(req.body, null, 2));
+    fs.writeFileSync(`${req.body.title}.json`, JSON.stringify(req.body, null, 2));
     res.send({ status: "Projet sauvegardé" });
 });
 
