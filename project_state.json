@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "name": "Home",
+      "desc": "Page d'accueil",
+      "x": 300,
+      "y": 100
+    }
+  ],
+  "links": []
+}
