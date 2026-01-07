@@ -5,8 +5,10 @@ const app = express();
 
 app.use(express.json());
 
-// 1. On sert tout le dossier "public"
+// 1. On sert tout le dossier "public" et le dossier pages
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/pages',express.static(path.join(__dirname,'pages')));
+
 
 const PAGES_DIR = path.join(__dirname, 'pages');
 if (!fs.existsSync(PAGES_DIR)) fs.mkdirSync(PAGES_DIR);
@@ -48,9 +50,15 @@ app.post('/save-page', (req, res) => {
 
 
 app.post('/create-page', (req, res) => {
-    const content = `<h1>Page du noeud ${req.body.id}</h1><p>${req.body.page_content}</p>`;
-    const fileName = `page_${Date.now()}.html`; // Nom unique
-    const filePath = path.join(__dirname, 'public', fileName); // Chemin vers ton dossier public
+    const content = 
+    `
+    <head>
+        <title>${req.body.title}</title>
+    </head>
+    <h1>${req.body.title}</h1>
+    <p>${req.body.page_content}</p>`;
+    const fileName = `page_${req.body.id}.html`; // Nom unique
+    const filePath = path.join(__dirname+'/pages', fileName); // Chemin vers ton dossier public
 
     // Écrit physiquement le fichier sur le serveur
     fs.writeFile(filePath, content, (err) => {
@@ -58,12 +66,10 @@ app.post('/create-page', (req, res) => {
             console.error(err);
             return res.status(500).send({ status: "Erreur lors de la création" });
         }
-        
-        console.log("Fichier créé !");
         // On renvoie l'URL du nouveau fichier au client
         res.send({ 
             status: "Fichier créé", 
-            url: `/${fileName}` 
+            url: `${'/pages/'+fileName}`
         });
     });
 });
@@ -74,6 +80,8 @@ app.post('/create-page', (req, res) => {
 app.get('/', (req, res) => {
     res.redirect('/html/uwu.html');
 });
+
+
 
 app.listen(3000, () => {
     console.log("🚀 Serveur lancé sur http://localhost:3000");

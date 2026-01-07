@@ -65,14 +65,16 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             id:node.id,
+                            title:node.name,
                             page_content:"Voici le contenu de la page"
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
+                        console.log(data);
                         console.log(data.status);
                         if (data.url) {
-                            window.location.href = data.url; 
+                            window.open(data.url, '_blank');
                         }
                     })
                     .catch(error => console.error('Erreur:', error));
