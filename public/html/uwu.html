@@ -2,50 +2,92 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Éditeur de Pages</title>
+    <title>Éditeur de Parcours</title>
     <link rel="stylesheet" href="../css/uwu.css">
+    <style>
+        /* Ajout rapide de style au cas où le CSS externe manque */
+        body { display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: sans-serif; overflow: hidden; }
+        #toolbar { padding: 10px; background: #eee; border-bottom: 1px solid #ccc; display: flex; gap: 10px; }
+        #main-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+        #workspace { flex: 1; position: relative; background: #fafafa; cursor: grab; }
+        #sidebar { width: 280px; background: #fff; border-left: 1px solid #ddd; padding: 20px; box-shadow: -2px 0 5px rgba(0,0,0,0.05); z-index: 10;}
+        
+        .node {
+            position: absolute; width: 120px; height: 80px; background: white; border: 2px solid #333;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            border-radius: 8px; cursor: pointer; user-select: none; z-index: 2;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.15);
+        }
+        .node.selected { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+        
+        #connections-layer { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 1; }
+        line { stroke: #555; stroke-width: 2; }
+        
+        .sidebar-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 8px 12px; cursor: pointer; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
+        button:hover { background: #f0f0f0; }
+        button.active { background: #e0f2fe; border-color: #3b82f6; color: #0284c7; }
+        button.primary { background: #3b82f6; color: white; border: none; }
+        button.primary:hover { background: #2563eb; }
+    </style>
 </head>
 <body>
 
     <div id="toolbar">
-        <button onclick="addNode()">+ Ajouter Nœud</button>
+        <button onclick="addNode()">➕ Ajouter Page</button>
         <button id="btn-link" onclick="toggleLinkMode()">🔗 Mode Liaison (OFF)</button>
-        <button onclick="deleteSelected()">🗑️ Supprimer Nœud</button>
-        <button id="btn_del">🗑️ Supprimer Tout</button>
+        <button onclick="deleteSelected()">🗑️ Supprimer Page</button>
+        <button id="btn_del" style="color:red;">⚠️ Tout vider</button>
     </div>
 
     <div id="main-container">
         <div id="workspace" onclick="handleWorkspaceClick(event)">
             <svg id="connections-layer">
                 <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                    refX="10" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" />
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
                     </marker>
                 </defs>
             </svg>
-            </div>
-
-        <div id="sidebar">
-            <h3>Infos</h3>
-            <button onclick="saveData()">Sauvegarder</button>
-            <button type='file' onclick="importData()">Importer</button>
-            <input type="file" id="file-input" style="display:none;">
-            
-            <div class="sidebar-group">
-                <label>Nom :</label>
-                <input type="text" id="input-name" placeholder="..." oninput="updateNodeData()">
-            </div>
-
-            <div class="sidebar-group">
-                <label>Description :</label>
-                <textarea id="input-desc" rows="4" placeholder="..." oninput="updateNodeData()"></textarea>
-            </div>
-
-            <button onclick="alert('Fonctionnalité future : Modifier le contenu')">Modifier la page</button>
         </div>
+
+<div id="sidebar">
+    <h3>Propriétés</h3>
+    
+    <div class="sidebar-group">
+        <button class="primary" onclick="saveData()">💾 Sauvegarder Projet</button>
+        <button onclick="importData()">📂 Importer</button>
+        
+        <button onclick="previewProject()" style="background-color: #22c55e; color: white; border: none; margin-top: 5px;">
+            ▶️ Visualiser
+        </button>
+        
+        <input type="file" id="file-input" style="display:none;">
     </div>
 
+    <hr>
+
+    <div class="sidebar-group">
+        <label>Nom de la page :</label>
+        <input type="text" id="input-name" placeholder="Sélectionnez un nœud..." oninput="updateNodeData()">
+    </div>
+
+    <div class="sidebar-group">
+        <label>Description (interne) :</label>
+        <textarea id="input-desc" rows="3" placeholder="..." oninput="updateNodeData()"></textarea>
+    </div>
+
+    <div class="sidebar-group" style="margin-top: 30px;">
+        <button class="primary" style="width: 100%; padding: 15px;" onclick="openSelectedPage()">
+            ✏️ Modifier le contenu de la page
+        </button>
+        <p style="font-size: 0.8em; color: #666; text-align: center; margin-top: 5px;">
+            Ouvre la page HTML générée
+        </p>
+    </div>
+</div>
     <script src="../js/uwu.js"></script>
 </body>
 </html>
