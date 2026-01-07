@@ -76,6 +76,36 @@ app.post('/create-page', (req, res) => {
 });
 
 
+app.post('/delete-page',(req,res)=>{
+    const filename=`page_${req.body.id}.html`;
+    const filepath=path.join(__dirname,"pages",filename);
+
+    fs.unlink(filepath,(error)=>{
+        if(error){
+            console.log("Erreur de supression : ",err);
+            return;
+        }
+        console.log(`Fichier \"${filename}\" supprimé avec succès`);
+    });
+
+    res.send({status:"Fichier supprimé"});
+});
+
+app.post('/delete-all-pages',async (req,res)=>{
+    try {
+        const files = await fs.promises.readdir(path.join(__dirname, "pages"));
+
+        await Promise.all(
+            files.filter(f => f.startsWith("page_") && f.endsWith(".html")).map(f =>fs.promises.unlink(path.join(__dirname, "pages", f)))
+        );
+
+        res.json({ success: true });
+
+    } catch (err) {
+        res.status(500).json({ error: "Suppression échouée" });
+    }
+});
+
 
 // Redirection de la racine vers ton interface principale
 app.get('/', (req, res) => {
