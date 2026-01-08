@@ -130,6 +130,22 @@ app.post('/add-link-between-pages', (req, res) => {
     res.send({ status: "Lien ajouté au HTML" });
 });
 
+// --- DANS SERVER.JS (Ajoute ça à la fin, avant app.listen) ---
+
+// ROUTE : Sauvegarder le contenu HTML venant de l'éditeur
+app.post('/save-full-page', (req, res) => {
+    const { id, htmlContent } = req.body;
+    
+    // Le chemin du fichier à modifier
+    const filePath = path.join(__dirname, 'pages', `page_${id}.html`);
+
+    // On écrase le fichier avec le nouveau contenu tout propre
+    fs.writeFileSync(filePath, htmlContent);
+
+    console.log(`Page ${id} sauvegardée (HTML écrasé).`);
+    res.send({ status: "OK" });
+});
+
 // Redirection accueil
 app.get('/', (req, res) => {
     res.redirect('/html/arbre.html');

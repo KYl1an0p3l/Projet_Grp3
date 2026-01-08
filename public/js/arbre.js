@@ -1,9 +1,39 @@
-/* --- uwu.js : Version Corrigée --- */
+/* --- DANS JS/ARBRE.JS (Tout en haut) --- */
 
 let nodes = [];
 let links = [];
 let selectedNodeId = null;
 
+// --- CHARGEMENT INTELLIGENT ---
+window.addEventListener('DOMContentLoaded', () => {
+    // On utilise sessionStorage au lieu de localStorage
+    // sessionStorage s'efface quand tu fermes l'onglet !
+    const savedData = sessionStorage.getItem('uwu_autosave');
+    
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+            
+            if (data.nodes) nodes = data.nodes;
+            if (data.links) links = data.links;
+            
+            const nameInput = document.getElementById('input_project_name');
+            if (nameInput && data.projectName) {
+                nameInput.value = data.projectName;
+            }
+
+            renderNodes();
+            console.log("♻️ Retour de l'éditeur : Projet restauré.");
+            
+            // OPTIONNEL : Si tu veux que la sauvegarde s'efface une fois chargée 
+            // (pour être sûr que si tu fais F5 ça reparte à zéro), décommente la ligne dessous :
+            // sessionStorage.removeItem('uwu_autosave'); 
+            
+        } catch (e) {
+            console.error("Erreur restauration", e);
+        }
+    }
+});
 // Mode liaison
 let isLinkMode = false;
 let linkStartNodeId = null;
@@ -116,24 +146,37 @@ function handleNodeClick(id) {
 
 // 4. Sidebar
 // 4. Remplir la sidebar (Mise à jour pour le bouton Modifier)
+// 4. Remplir la sidebar (AVEC SAUVEGARDE AUTO)
+// --- DANS JS/ARBRE.JS (Vers la fin) ---
+
 function populateSidebar(id) {
     const node = nodes.find(n => n.id === id);
     if (node) {
-        // Remplissage des champs texte
         document.getElementById('input-name').value = node.name;
         document.getElementById('input-desc').value = node.desc;
 
-        // --- C'est ici qu'on branche ton bouton existant ---
         const btnEdit = document.getElementById('btn-edit');
         
-        // On change son comportement : Clic = Aller vers editor.html avec l'ID
-        btnEdit.onclick = () => {
-            // On redirige vers la page d'édition avec l'ID du nœud dans l'URL
+        // On clone le bouton pour supprimer les anciens écouteurs d'événements (sécurité)
+        const newBtn = btnEdit.cloneNode(true);
+        btnEdit.parentNode.replaceChild(newBtn, btnEdit);
+        
+        newBtn.onclick = () => {
+            // SAUVEGARDE TEMPORAIRE
+            const currentState = {
+                nodes: nodes,
+                links: links,
+                projectName: document.getElementById('input_project_name').value
+            };
+            
+            // On écrit dans sessionStorage (mémoire temporaire de l'onglet)
+            sessionStorage.setItem('uwu_autosave', JSON.stringify(currentState));
+
+            // On part vers l'éditeur
             window.location.href = `/html/editor.html?id=${id}`;
         };
     }
 }
-
 // 5. Mise à jour (Texte + HTML)
 function updateNodeData() {
     if (!selectedNodeId) return;
@@ -339,3 +382,4 @@ async function saveData() {
     });
     alert("Projet sauvegardé !");
 }
+

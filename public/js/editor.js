@@ -320,3 +320,167 @@ addable_content.forEach(element => {
 });
 
 
+// --- 1. CODE DE CHARGEMENT (À AJOUTER) ---
+// On récupère l'ID de la page dans l'URL
+const params = new URLSearchParams(window.location.search);
+const pageId = params.get('id');
+
+if (pageId) {
+    // On demande au serveur le contenu actuel de la page
+    fetch(`/pages/page_${pageId}.html?t=${Date.now()}`)
+        .then(res => res.text())
+        .then(html => {
+            // On convertit le texte en HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // On prend tout ce qu'il y a dans le <body> du fichier
+            // (Le titre, la description, ET TON BOUTON DE LIEN)
+            const existingContent = doc.body.innerHTML;
+            
+            // On l'injecte dans la zone d'édition (canvas)
+            const canvas = document.getElementById("main_center");
+            canvas.innerHTML = existingContent;
+
+            // Optionnel : Si tu veux rendre les anciens éléments "cliquables" pour l'édition,
+            // il faudrait rajouter ici une logique pour leur remettre les écouteurs d'événements.
+            // Mais pour l'instant, ça suffit pour voir le bouton et ne pas le perdre !
+        })
+        .catch(err => console.error("Impossible de charger la page :", err));
+} else {
+    alert("Pas d'ID de page fourni !");
+}
+
+// --- 2. BOUTON DE SAUVEGARDE (À AJOUTER À LA FIN) ---
+
+const saveBtn = document.createElement('button');
+saveBtn.textContent = "💾 Sauvegarder la Page";
+// Petit style pour le placer en bas à droite
+saveBtn.style.cssText = "position: fixed; bottom: 20px; right: 20px; padding: 15px; background: #27ae60; color: white; border: none; font-size: 16px; cursor: pointer; z-index: 1000; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);";
+
+document.body.appendChild(saveBtn);
+
+saveBtn.onclick = () => {
+    // 1. On vérifie l'ID
+    if (!pageId) {
+        alert("Erreur : Impossible de sauvegarder (pas d'ID trouvé).");
+        return;
+    }
+
+    // 2. On récupère le contenu de la zone de dessin
+    const editorContent = document.getElementById('main_center').innerHTML;
+
+    // 3. On reconstruit le HTML complet pour qu'il soit autonome
+    // On n'oublie pas d'inclure le CSS editor.css pour garder le style
+    const finalHTML = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Page ${pageId}</title>
+    <link rel="stylesheet" href="../css/editor.css">
+    <style>
+        /* Styles de base pour que la page prenne tout l'écran */
+        body { margin: 0; padding: 0; min-height: 100vh; background: #f0f0f0; }
+        #main_center { 
+            position: relative; 
+            width: 100%; 
+            height: 100vh; 
+            overflow: hidden; 
+            background: white; 
+        }
+    </style>
+</head>
+<body>
+    <div id="main_center">
+        ${editorContent}
+    </div>
+</body>
+</html>`;
+
+    // 4. On envoie tout au serveur
+    fetch('/save-full-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id: pageId,
+            htmlContent: finalHTML
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("✅ Page sauvegardée avec succès !");
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Erreur lors de la sauvegarde.");
+    });
+};
+
+// --- 3. BOUTON SAUVEGARDER ET QUITTER (À AJOUTER À LA FIN) ---
+
+const saveAndExitBtn = document.createElement('button');
+saveAndExitBtn.textContent = "↩️ Sauvegarder et Retour";
+// On le place à gauche du bouton Sauvegarder
+saveAndExitBtn.style.cssText = "position: fixed; bottom: 20px; right: 240px; padding: 15px; background: #34495e; color: white; border: none; font-size: 16px; cursor: pointer; z-index: 1000; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);";
+
+document.body.appendChild(saveAndExitBtn);
+
+saveAndExitBtn.onclick = () => {
+    // 1. Vérifications d'usage
+    const params = new URLSearchParams(window.location.search);
+    const pageId = params.get('id');
+    
+    if (!pageId) {
+        alert("Erreur : Pas d'ID de page !");
+        window.location.href = 'uwu.html'; // Retour forcé
+        return;
+    }
+
+    // 2. Récupération du contenu
+    const editorContent = document.getElementById('main_center').innerHTML;
+
+    // 3. Construction du HTML complet
+    const finalHTML = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Page ${pageId}</title>
+    <link rel="stylesheet" href="../css/editor.css">
+    <style>
+        body { margin: 0; padding: 0; min-height: 100vh; background: #f0f0f0; }
+        #main_center { 
+            position: relative; 
+            width: 100%; 
+            height: 100vh; 
+            overflow: hidden; 
+            background: white; 
+        }
+    </style>
+</head>
+<body>
+    <div id="main_center">
+        ${editorContent}
+    </div>
+</body>
+</html>`;
+
+    // 4. Envoi au serveur
+    fetch('/save-full-page', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id: pageId,
+            htmlContent: finalHTML
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        // 5. REDIRECTION (C'est ici que ça se passe)
+        // Une fois que le serveur dit "OK", on retourne au graphe
+   window.location.href = '/html/arbre.html';
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erreur de sauvegarde. Le retour est annulé pour ne pas perdre vos données.");
+    });
+};
