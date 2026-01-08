@@ -101,35 +101,68 @@ app.post('/update-page-meta', (req, res) => {
     res.send({ status: "Méta-données mises à jour" });
 });
 
-// 6. Ajouter un lien (bouton) entre deux pages
+// 6. Ajouter un lien (bouton) entre deux pages (FOOTER FIXE EN BAS DE FENÊTRE)
 app.post('/add-link-between-pages', (req, res) => {
     const { fromId, toId } = req.body;
-    const fileFrom = path.join(PAGES_DIR, `page_${fromId}.html`);
-    const targetUrl = `/pages/page_${toId}.html`;
 
-    if (!fs.existsSync(fileFrom)) return res.status(404).send({ status: "Source introuvable" });
+    // Fonction pour gérer l'ajout dans un footer FIXE
+    const addLinkToFixedFooter = (filePath, targetUrl, btnText) => {
+        if (!fs.existsSync(filePath)) return;
 
-    let content = fs.readFileSync(fileFrom, 'utf-8');
+        let content = fs.readFileSync(filePath, 'utf-8');
+        
+        // 1. On évite les doublons
+        if (content.includes(targetUrl)) return;
 
-    // On évite les doublons
-    if (content.includes(targetUrl)) return res.send({ status: "Lien existe déjà" });
+        // Le bouton (style épuré)
+        const btnHtml = `<a href="${targetUrl}" style="margin-left: 10px; text-decoration: none;"><button style="cursor: pointer; padding: 10px 15px; font-size: 14px;">${btnText}</button></a>`;
 
-    const btnHtml = `
-    <div style="margin-top: 20px;">
-        <a href="${targetUrl}"><button>Aller vers la suite</button></a>
-    </div>`;
+        // 2. Vérification : Est-ce qu'un footer existe déjà ?
+        if (content.includes('</footer>')) {
+            // Le footer existe, on ajoute le bouton dedans
+            content = content.replace('</footer>', `${btnHtml}\n</footer>`);
+        } else {
+            // Le footer n'existe pas, on le crée
+            // CSS EXPLICATIF :
+            // position: fixed; bottom: 0; left: 0; width: 100%; -> Colle le bloc en bas de l'écran sur toute la largeur
+            // box-sizing: border-box; -> S'assure que le padding ne casse pas la largeur
+            // z-index: 999; -> S'assure qu'il passe au-dessus du reste si besoin
+            const footerHtml = `
+    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f9f9f9; border-top: 1px solid #ccc; padding: 15px 20px; text-align: right; box-sizing: border-box; z-index: 999;">
+        ${btnHtml}
+    </footer>`;
+            
+            // On l'insère avant la fin du body
+            // Note : Pour éviter que le footer ne cache le texte du bas de page, on pourrait ajouter un padding-bottom au body, 
+            // mais comme demandé, je ne touche qu'à l'injection du lien.
+            if (content.includes('</body>')) {
+                content = content.replace('</body>', `${footerHtml}\n</body>`);
+            } else {
+                content += footerHtml;
+            }
+        }
 
-    if (content.includes('</body>')) {
-        content = content.replace('</body>', `${btnHtml}\n</body>`);
-    } else {
-        content += btnHtml;
-    }
+        fs.writeFileSync(filePath, content);
+    };
 
-    fs.writeFileSync(fileFrom, content);
-    console.log(`Lien ajouté: ${fromId} -> ${toId}`);
-    res.send({ status: "Lien ajouté au HTML" });
+    // --- EXECUTION ---
+
+    // 1. Bouton SUIVANT
+    addLinkToFixedFooter(
+        path.join(PAGES_DIR, `page_${fromId}.html`),
+        `/pages/page_${toId}.html`,
+        "Aller vers la suite 👉"
+    );
+
+    // 2. Bouton PRÉCÉDENT
+    addLinkToFixedFooter(
+        path.join(PAGES_DIR, `page_${toId}.html`),
+        `/pages/page_${fromId}.html`,
+        "👈 Retour précédent"
+    );
+
+    res.send({ status: "Footer fixe ajouté" });
 });
-
 // --- DANS SERVER.JS (Ajoute ça à la fin, avant app.listen) ---
 
 // ROUTE : Sauvegarder le contenu HTML venant de l'éditeur
