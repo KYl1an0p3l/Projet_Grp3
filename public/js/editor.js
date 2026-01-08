@@ -484,3 +484,12 @@ saveAndExitBtn.onclick = () => {
         alert("Erreur de sauvegarde. Le retour est annulé pour ne pas perdre vos données.");
     });
 };
+
+document.querySelectorAll(".placed_element").addEventListener("click", (event) => {
+    //event.preventDefault(); //Empêche redirection du lien pour l'édition
+    event.stopPropagation();
+    event.targeted_element.style.border = "gray solid 2px";    
+    selectPlacedItem(newElement.dataset.id);
+    createPannelFromId(elemId, newElement);
+});
+setTimeout(() => {document.querySelectorAll(".placed_element").forEach(item => addPlacedItemToList(item));},10);
