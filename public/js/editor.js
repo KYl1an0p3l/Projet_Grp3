@@ -485,11 +485,12 @@ saveAndExitBtn.onclick = () => {
     });
 };
 
-document.querySelectorAll(".placed_element").addEventListener("click", (event) => {
-    //event.preventDefault(); //Empêche redirection du lien pour l'édition
-    event.stopPropagation();
-    event.targeted_element.style.border = "gray solid 2px";    
-    selectPlacedItem(newElement.dataset.id);
-    createPannelFromId(elemId, newElement);
+document.querySelectorAll(".placed_element").forEach(item => {
+    item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        item.style.border = "2px solid gray";
+        selectPlacedItem(item.dataset.id);
+        createPannelFromId(item.dataset.type, item);
+    });
 });
 setTimeout(() => {document.querySelectorAll(".placed_element").forEach(item => addPlacedItemToList(item));},10);
