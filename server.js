@@ -132,7 +132,7 @@ app.post('/add-link-between-pages', (req, res) => {
 
 // Redirection accueil
 app.get('/', (req, res) => {
-    res.redirect('/html/uwu.html');
+    res.redirect('/html/arbre.html');
 });
 
 // Lancement
