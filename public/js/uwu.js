@@ -317,7 +317,11 @@ workspace.addEventListener('mousemove',(event)=>{
 let btn_del=document.getElementById("btn_del");
 btn_del.addEventListener("click", (event)=>{
     //Suppression des pages html de chaque noeuds puis suppression des noeuds eux mêmes 
-    fetch('/delete-all-pages',{method:'POST'});
+    fetch('/delete-all-pages',{
+        method:"POST",
+        headers: { "Content-Type": "application/json" },
+        body:JSON.stringify({nodes:nodes.map(n => n.id)})
+    });
 
     nodes=[];
     links=[];

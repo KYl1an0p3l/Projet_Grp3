@@ -93,17 +93,28 @@ app.post('/delete-page',(req,res)=>{
 
 app.post('/delete-all-pages',async (req,res)=>{
     try {
-        const files = await fs.promises.readdir(path.join(__dirname, "pages"));
+        const ids = req.body.nodes; // tableau d'IDs
+        const pagesDir = path.join(__dirname, "pages");
 
-        await Promise.all(
-            files.filter(f => f.startsWith("page_") && f.endsWith(".html")).map(f =>fs.promises.unlink(path.join(__dirname, "pages", f)))
-        );
+        const files = await fs.promises.readdir(pagesDir);
+
+        const deletions = files
+            .filter(file =>
+                ids.some(id => file === `page_${id}.html`)
+            )
+            .map(file =>
+                fs.promises.unlink(path.join(pagesDir, file))
+            );
+
+        await Promise.all(deletions);
 
         res.json({ success: true });
 
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: "Suppression échouée" });
     }
+
 });
 
 
