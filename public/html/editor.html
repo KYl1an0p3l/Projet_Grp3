@@ -3,6 +3,7 @@
 <head>
     <title>Editeur</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/editor.css"/>
 </head>
 
@@ -10,11 +11,23 @@
     <header>
         <div id="main_header">
             <div class="header_element">
-                <img id="textarea" src="../res/img/text-box.jpg"/>
+                <img id="textarea" src="../../res/img/text-box.jpg"/>
+                <span class="header_label">Texte</span>
             </div>
-                
+            <div class="header_element">
+                <img id="imgarea" src="../../res/img/image.jpg"/>
+                <span class="header_label">Image</span>
+            </div>
+            <div class="header_element">
+                <img id="background" src="../../res/img/background.png"/>
+                <span class="header_label">Background</span>
+            </div>     
         </div>
     </header>
+    <nav id="placed-list">
+        <h3>Éléments placés</h3>
+        <ul id="placed-items"></ul>
+    </nav>
     <main>
         <div id="main_center">
 
