@@ -41,6 +41,16 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.placed_element[href],
+.placed_element[href]:visited,
+.placed_element[href]:hover,
+.placed_element[href]:active,
+.placed_element[href]:focus {
+    color: white;
+    text-decoration: none;
+    outline: none;
+}
+
 #placed-list h3 {
     margin: 0 0 1rem 0;
     font-size: 1rem;

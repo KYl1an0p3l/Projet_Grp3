@@ -38,6 +38,18 @@ const pannelNeedsForId = {
             {name: "gradient_from", label: "Dégradé - Couleur de départ", type: "color", default: "#ff0000"},
             {name: "gradient_to", label: "Dégradé - Couleur d'arrivée", type: "color", default: "#0000ff"}
         ]
+    },
+    "hypertext": {
+    title: "Configuration du lien",
+        fields: [
+            {name :"posX", label:"X",type:"number",placeholder:"Position X en pixel...",default:0},
+            {name : "posY", label:"Y",type:"number",placeholder:"Position Y en pixel...",default:0},
+            {name :"height", label:"Hauteur",type:"number",placeholder:"Hauteur en pixel...",default:100},
+            {name :"width", label:"Largeur",type:"number",placeholder:"Largeur en pixel...",default:100},
+            {name : "text", label:"Texte",type:"textarea",placeholder:"Lorem ipsum...",default:"Lorem ipsum..."},
+            {name : "zindex", label:"Z-Index",type:"number",placeholder:"Plan de l'élément (ex : 0 pour l'arrière plan)...",default:0},
+            {name :"link", label:"Lien",type:"textarea",placeholder:"Lien interne ou externe...",default:"../html/uwu.html"}
+        ]
     }
 };
 
@@ -156,18 +168,23 @@ function createPannelFromId(elemId, edited_element){
         const w = edited_element.offsetWidth || pannelNeedsForId[elemId].fields.find(f=>f.name==='width')?.default;
         const h = edited_element.offsetHeight || pannelNeedsForId[elemId].fields.find(f=>f.name==='height')?.default;
         const text = edited_element.textContent || '';
+        const link = edited_element.href || '';
+
         const posXInput = document.getElementById('posX');
         const posYInput = document.getElementById('posY');
         const zInput = document.getElementById('zindex');
         const wInput = document.getElementById('width');
         const hInput = document.getElementById('height');
         const textInput = document.getElementById('text');
+        const linkInput = document.getElementById('link');
+
         if(posXInput) posXInput.value = left;
         if(posYInput) posYInput.value = top;
         if(zInput) zInput.value = z;
         if(wInput) wInput.value = w;
         if(hInput) hInput.value = h;
         if(textInput) textInput.value = text;
+        if(linkInput) linkInput.value = link;
     }
 
     addButton.addEventListener("click", (event) => {
@@ -201,6 +218,16 @@ function createPannelFromId(elemId, edited_element){
                 canvas.style.background = document.getElementById("color").value;
             }
         }
+        else if(elemId === "hypertext"){
+            newElement = document.createElement("a");
+            const text = document.getElementById("text").value;
+            const link = document.getElementById("link").value;
+
+            newElement.textContent = text || "Lien";
+            newElement.href = link || "#";
+            newElement.style.textDecoration = "none";
+        }
+
         if(!newElement){
             newPannel.classList.remove("open");
             document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
@@ -233,6 +260,7 @@ function createPannelFromId(elemId, edited_element){
         document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
         document.querySelectorAll(".placed_element").forEach(elem => elem.style.border = "transparent solid 2px");
         newElement.addEventListener("click", (event) => {
+            //event.preventDefault(); //Empêche redirection du lien pour l'édition
             event.stopPropagation();
             newElement.style.border = "gray solid 2px";
             selectPlacedItem(newElement.dataset.id);
