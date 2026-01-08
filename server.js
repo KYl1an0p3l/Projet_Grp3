@@ -16,12 +16,17 @@ app.use('/pages', express.static(PAGES_DIR));
 // --- ROUTE 1 : Sauvegarder l'état global du projet ---
 // Méthode POST : Le client envoie des données à écrire.
 app.post('/save-project', (req, res) => {
+<<<<<<< HEAD
     // fs.writeFileSync : Écrit le fichier de manière synchrone (bloque le serveur tant que ce n'est pas fini).
     // JSON.stringify(req.body, null, 2) : Convertit l'objet JavaScript reçu en texte formaté et lisible.
     fs.writeFileSync('project_state.json', JSON.stringify(req.body, null, 2));
     
     // Répond au client que tout s'est bien passé.
     res.send({ status: "Saved" });
+=======
+    fs.writeFileSync(`${req.body.title}.json`, JSON.stringify(req.body, null, 2));
+    res.send({ status: "Projet sauvegardé" });
+>>>>>>> parent of af6da6b (enregistrement des projets dans in fichier dédié)
 });
 
 // --- ROUTE 2 : Charger l'état global du projet ---
