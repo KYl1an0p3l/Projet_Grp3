@@ -3,7 +3,6 @@ html, body {
     padding: 0;
 }
 
-
 header{
     display : flex;
     justify-content: center;
@@ -28,7 +27,7 @@ header{
 .header_element {
     border : white solid 2px;
     display : flex;
-    flex-direction: column; /* vertical */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding : auto;
@@ -37,11 +36,21 @@ header{
     width : 10vw;
     z-index : 2;
     cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.header_element:hover {
+    background-color: #f5f5f5;
+}
+
+.header_element.active {
+    border: orange solid 2px;
+    background-color: #fff3e0;
 }
 
 .header_element img {
     max-width: 100%;
-    max-height: 80%; /* laisser de la place pour le texte */
+    max-height: 80%;
     object-fit: contain;
 }
 
@@ -51,7 +60,6 @@ header{
     text-align: center;
     color: black;
 }
-
 
 main{
     display : flex;
@@ -71,8 +79,10 @@ main{
     border : white solid 2px;
     box-shadow : 0.25vw 0.25vh 0.5vw 0.5vh rgb(185, 185, 185);
     z-index : 0;
+    overflow: hidden;
 }
 
+/* ========== PANNEAU DE CONFIGURATION ========== */
 #config_panel{
     position : fixed;
     top : 20.75vh;
@@ -80,24 +90,167 @@ main{
 
     display : flex;
     flex-direction : column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: stretch;
 
     height : 65vh;
     width : 25vw;
-    background-color : gray;
+    min-width: 300px;
+    background-color : #5a5a5a;
 
-    border-radius : 1vw;
+    border-radius : 1vw 0 0 1vw;
+    box-shadow: -3px 0 10px rgba(0, 0, 0, 0.3);
 
     transform : translateX(100%);
     transition : transform 0.3s ease;
 
-    padding : 1rem;
+    padding : 1.5rem 1rem;
     z-index : 100;
+    overflow-y: auto;
 }
 
 #config_panel.open{
     transform : translateX(0);
+}
+
+/* Titre du panneau */
+#config_panel h3 {
+    margin: 0 0 20px 0;
+    color: orange;
+    text-align: center;
+    font-size: 18px;
+    border-bottom: 2px solid orange;
+    padding-bottom: 10px;
+}
+
+/* Bouton fermer (X) */
+#config_panel > button:first-child {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    z-index: 10;
+}
+
+#config_panel > button:first-child:hover {
+    background-color: #cc0000;
+}
+
+/* Conteneurs de champs */
+#config_panel > div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+/* Labels */
+#config_panel label {
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+/* Inputs, textarea, select */
+#config_panel input[type="text"],
+#config_panel input[type="number"],
+#config_panel input[type="url"],
+#config_panel textarea,
+#config_panel select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 13px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+#config_panel input:focus,
+#config_panel textarea:focus,
+#config_panel select:focus {
+    outline: none;
+    border-color: orange;
+}
+
+/* Textarea spécifique */
+#config_panel textarea {
+    resize: vertical;
+    min-height: 70px;
+    font-family: inherit;
+}
+
+/* Input color */
+#config_panel input[type="color"] {
+    width: 100%;
+    height: 35px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px;
+}
+
+/* Input file */
+#config_panel input[type="file"] {
+    width: 100%;
+    padding: 6px;
+    background-color: white;
+    border: 1px solid #888;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Checkbox */
+#config_panel input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+/* Message d'erreur */
+#error_message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 4px solid #c62828;
+    font-size: 12px;
+    margin-bottom: 12px;
+}
+
+/* Bouton Ajouter */
+#config_panel > button:last-child {
+    width: 100%;
+    padding: 12px;
+    background-color: orange;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+
+#config_panel > button:last-child:hover {
+    background-color: #ff8c00;
+}
+
+#config_panel > button:last-child:active {
+    transform: scale(0.98);
 }
 
 footer{
@@ -108,4 +261,25 @@ footer{
     width : 100vw;
     background-color : orange;
     z-index : 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #config_panel {
+        width: 40vw;
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    #config_panel {
+        width: 80vw;
+        right: 50%;
+        transform: translateX(50%);
+        border-radius: 1vw;
+    }
+    
+    #config_panel.open {
+        transform: translateX(50%);
+    }
 }

@@ -1,176 +1,288 @@
 const addable_content = document.querySelectorAll(".header_element");
 const main = document.querySelector("main");
 const canvas = document.getElementById("main_center");
-const panel = document.getElementById("config_panel");
-const panelTitle = document.getElementById("panel_title");
 
-// Panneaux pour chaque élément
+// ================== PANNEAUX ==================
 const pannelNeedsForId = {
+
     "textarea": {
-        title: "Configuration - TextArea",
+        title: "Configuration - Texte",
         fields: [
-            {name :"posX", label:"X",type:"number",placeholder:"Position X en pixel...",default:0},
-            {name : "posY", label:"Y",type:"number",placeholder:"Position Y en pixel...",default:0},
-            {name :"height", label:"Hauteur",type:"number",placeholder:"Hauteur en pixel...",default:100},
-            {name :"width", label:"Largeur",type:"number",placeholder:"Largeur en pixel...",default:100},
-            {name : "text", label:"Texte",type:"textarea",placeholder:"Lorem ipsum...",default:"Lorem ipsum..."},
-            {name : "zindex", label:"Z-Index",type:"number",placeholder:"Plan de l'élément (ex : 0 pour l'arrière plan)...",default:0}
+            {name: "posX", label: "X", type: "number", default: 0},
+            {name: "posY", label: "Y", type: "number", default: 0},
+            {name: "text", label: "Texte", type: "textarea", default: "Lorem ipsum"},
+            {name: "zindex", label: "Z-Index", type: "number", default: 0}
         ]
     },
 
-    //  AJOUT POUR IMAGE
     "imgarea": {
         title: "Configuration - Image",
         fields: [
-            {name :"posX", label:"X",type:"number",placeholder:"Position X en pixel...",default:0},
-            {name : "posY", label:"Y",type:"number",placeholder:"Position Y en pixel...",default:0},
-            {name :"height", label:"Hauteur",type:"number",placeholder:"Hauteur en pixel...",default:100},
-            {name :"width", label:"Largeur",type:"number",placeholder:"Largeur en pixel...",default:100},
-            {name : "src", label:"Image",type:"file"},
-            {name : "zindex", label:"Z-Index",type:"number",placeholder:"Plan de l'élément...",default:0}
+            {name: "posX", label: "X", type: "number", default: 0},
+            {name: "posY", label: "Y", type: "number", default: 0},
+            {name: "width", label: "Largeur", type: "number", default: 150},
+            {name: "height", label: "Hauteur", type: "number", default: 150},
+            {name: "src", label: "Image", type: "file"},
+            {name: "zindex", label: "Z-Index", type: "number", default: 0}
         ]
     },
-    // Ajout pour background
+
     "background": {
-    title: "Configuration - Fond",
-    fields: [
-        {name: "color", label: "Couleur de fond", type: "color", default: "#ffffff"},
-        {name: "gradient_from", label: "Dégradé - Couleur de départ", type: "color", default: "#ff0000"},
-        {name: "gradient_to", label: "Dégradé - Couleur d'arrivée", type: "color", default: "#0000ff"}
-    ]
-}
+        title: "Configuration - Fond",
+        fields: [
+            {name: "color", label: "Couleur unie", type: "color", default: "#ffffff"},
+            {name: "gradient_from", label: "Dégradé - De", type: "color", default: "#ff0000"},
+            {name: "gradient_to", label: "Dégradé - Vers", type: "color", default: "#0000ff"},
+            {name: "use_gradient", label: "Utiliser le dégradé", type: "checkbox", default: false}
+        ]
+    },
+
+    "hypertext": {
+        title: "Configuration - Hypertexte",
+        fields: [
+            {name: "posX", label: "X", type: "number", default: 0},
+            {name: "posY", label: "Y", type: "number", default: 0},
+            {name: "text", label: "Texte", type: "textarea", default: "Clique ici"},
+            {name: "url", label: "Lien", type: "text", default: ""},
+            {name: "target", label: "Ouverture", type: "select", options: [
+                {label: "Même page", value: "_self"},
+                {label: "Nouvel onglet", value: "_blank"}
+            ]},
+            {name: "color", label: "Couleur", type: "color", default: "#0000ff"},
+            {name: "fontSize", label: "Taille", type: "number", default: 16},
+            {name: "zindex", label: "Z-Index", type: "number", default: 0}
+        ]
+    }
 };
 
-// Fonction pour créer le panneau
-function createPannelFromId(elemId){
-    // sécurité
+// ================== CREATION DU PANNEAU ==================
+function createPannelFromId(elemId) {
+
     if (!pannelNeedsForId[elemId]) return;
 
-    // supprimer un éventuel ancien panneau
-    const oldPannel = document.getElementById("config_panel");
-    if(oldPannel) oldPannel.remove();
+    let panel = document.getElementById("config_panel");
+    let closeBtn;
 
-    // créer le nouveau panneau
-    const newPannel = document.createElement("div")
-    newPannel.id = "config_panel";
-    main.appendChild(newPannel);
+    // Création du panneau UNE SEULE FOIS
+    if (!panel) {
+        panel = document.createElement("div");
+        panel.id = "config_panel";
+        main.appendChild(panel);
 
-    // titre
+        closeBtn = document.createElement("button");
+        closeBtn.textContent = "X";
+        closeBtn.setAttribute("aria-label", "Fermer le panneau");
+        closeBtn.style.position = "absolute";
+        closeBtn.style.right = "15px";
+        closeBtn.style.top = "10px";
+
+        closeBtn.addEventListener("click", () => {
+            panel.classList.remove("open");
+            addable_content.forEach(el => el.classList.remove("active"));
+        });
+
+        panel.appendChild(closeBtn);
+    } else {
+        // Récupérer le bouton existant
+        closeBtn = panel.querySelector("button");
+    }
+
+    // Nettoyage du contenu SANS enlever la croix
+    Array.from(panel.children).forEach(child => {
+        if (child !== closeBtn) {
+            child.remove();
+        }
+    });
+
+    // Titre
     const title = document.createElement("h3");
     title.textContent = pannelNeedsForId[elemId].title;
-    newPannel.appendChild(title);
+    panel.appendChild(title);
 
-    // création des champs
+    // Message d'erreur
+    const errorMsg = document.createElement("div");
+    errorMsg.id = "error_message";
+    errorMsg.style.color = "red";
+    errorMsg.style.marginBottom = "10px";
+    errorMsg.style.display = "none";
+    panel.appendChild(errorMsg);
+
+    // Champs
     pannelNeedsForId[elemId].fields.forEach(field => {
-        const fieldWrapper = document.createElement("div");
-        fieldWrapper.style.display = "flex";
-        fieldWrapper.style.flexDirection = "column";
-        fieldWrapper.style.marginBottom = "10px";
-        fieldWrapper.style.width = "80%";
+        const wrap = document.createElement("div");
+        wrap.style.display = "flex";
+        wrap.style.flexDirection = "column";
+        wrap.style.marginBottom = "10px";
 
         const label = document.createElement("label");
         label.textContent = field.label;
-        label.htmlFor = field.name;
-        fieldWrapper.appendChild(label);
+        label.setAttribute("for", field.name);
 
         let input;
-        if(field.type === "textarea"){
+        if (field.type === "textarea") {
             input = document.createElement("textarea");
-            input.rows = 5;
+            input.rows = 4;
+        } else if (field.type === "select") {
+            input = document.createElement("select");
+            field.options.forEach(opt => {
+                const option = document.createElement("option");
+                option.value = opt.value;
+                option.textContent = opt.label;
+                input.appendChild(option);
+            });
+        } else if (field.type === "checkbox") {
+            input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = field.default || false;
         } else {
             input = document.createElement("input");
             input.type = field.type;
         }
 
-        input.name = field.name;
         input.id = field.name;
-        input.placeholder = field.placeholder || "";
-        input.value = field.default !== undefined ? field.default : "";
-
-        fieldWrapper.appendChild(input);
-        newPannel.appendChild(fieldWrapper);
-    });
-
-    // bouton ajouter 
-    const addButton = document.createElement("button");
-    addButton.textContent = "Ajouter";
-    newPannel.appendChild(addButton);
-
-    addButton.addEventListener("click", (event) => {
-        if(elemId === "textarea"){
-            const added_textarea = document.createElement("p");
-            canvas.appendChild(added_textarea);
-            added_textarea.style.position = "absolute";
-            added_textarea.style.left = document.getElementById("posX").value + "px";
-            added_textarea.style.top = document.getElementById("posY").value + "px";
-            added_textarea.textContent = document.getElementById("text").value;
-            added_textarea.style.zIndex = document.getElementById("zindex").value;
+        if (field.type !== "checkbox" && field.type !== "file") {
+            input.value = field.default || "";
         }
 
-        if(elemId === "imgarea"){
+        wrap.appendChild(label);
+        wrap.appendChild(input);
+        panel.appendChild(wrap);
+    });
+
+    // Bouton ajouter
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "Ajouter";
+    panel.appendChild(addBtn);
+
+    addBtn.addEventListener("click", () => {
+        const errorMsg = document.getElementById("error_message");
+        errorMsg.style.display = "none";
+        errorMsg.textContent = "";
+
+        // TEXTE
+        if (elemId === "textarea") {
+            const textValue = document.getElementById("text").value.trim();
+            if (!textValue) {
+                errorMsg.textContent = "Le texte ne peut pas être vide";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            const p = document.createElement("p");
+            p.textContent = textValue;
+            p.style.position = "absolute";
+            p.style.left = document.getElementById("posX").value + "px";
+            p.style.top = document.getElementById("posY").value + "px";
+            p.style.zIndex = document.getElementById("zindex").value;
+            canvas.appendChild(p);
+        }
+
+        // IMAGE
+        if (elemId === "imgarea") {
             const fileInput = document.getElementById("src");
             const file = fileInput.files[0];
-            if (!file) return; // ne rien faire si aucun fichier sélectionné
+            
+            if (!file) {
+                errorMsg.textContent = "Veuillez sélectionner une image";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            // Vérifier que c'est bien une image
+            if (!file.type.startsWith('image/')) {
+                errorMsg.textContent = "Le fichier doit être une image";
+                errorMsg.style.display = "block";
+                return;
+            }
 
             const img = document.createElement("img");
             img.src = URL.createObjectURL(file);
-            canvas.appendChild(img);
             img.style.position = "absolute";
             img.style.left = document.getElementById("posX").value + "px";
             img.style.top = document.getElementById("posY").value + "px";
             img.style.width = document.getElementById("width").value + "px";
             img.style.height = document.getElementById("height").value + "px";
             img.style.zIndex = document.getElementById("zindex").value;
+            canvas.appendChild(img);
         }
 
-        if(elemId === "background"){
-            const color = document.getElementById("color").value;
-            const from = document.getElementById("gradient_from").value;
-            const to = document.getElementById("gradient_to").value;
+        // BACKGROUND
+        if (elemId === "background") {
+            const useGradient = document.getElementById("use_gradient").checked;
+            
+            if (useGradient) {
+                const from = document.getElementById("gradient_from").value;
+                const to = document.getElementById("gradient_to").value;
+                canvas.style.background = `linear-gradient(${from}, ${to})`;
+            } else {
+                const color = document.getElementById("color").value;
+                canvas.style.background = color;
+            }
+        }
 
-            if(from && to){
-            canvas.style.background = `linear-gradient(${from}, ${to})`;
-        } else {
-            canvas.style.background = color;
-    }
-}
+        // HYPERTEXTE
+        if (elemId === "hypertext") {
+            const textValue = document.getElementById("text").value.trim();
+            const urlValue = document.getElementById("url").value.trim();
 
+            if (!textValue) {
+                errorMsg.textContent = "Le texte ne peut pas être vide";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            if (!urlValue) {
+                errorMsg.textContent = "L'URL ne peut pas être vide";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            // Validation basique de l'URL
+            try {
+                new URL(urlValue);
+            } catch (e) {
+                errorMsg.textContent = "L'URL n'est pas valide (doit commencer par http:// ou https://)";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            const a = document.createElement("a");
+            a.textContent = textValue;
+            a.href = urlValue;
+            a.target = document.getElementById("target").value;
+            a.style.position = "absolute";
+            a.style.left = document.getElementById("posX").value + "px";
+            a.style.top = document.getElementById("posY").value + "px";
+            a.style.color = document.getElementById("color").value;
+            a.style.fontSize = document.getElementById("fontSize").value + "px";
+            a.style.zIndex = document.getElementById("zindex").value;
+            a.style.cursor = "pointer";
+            a.style.textDecoration = "underline";
+            canvas.appendChild(a);
+        }
+
+        // Fermer le panneau après ajout réussi
+        panel.classList.remove("open");
+        addable_content.forEach(el => el.classList.remove("active"));
     });
 
-    setTimeout(() => {
-        newPannel.classList.add("open");
-        //Création du bonton pour fermer
-        const closeButton = document.createElement("button");
-        closeButton.textContent = "X";
-        newPannel.appendChild(closeButton);
-        closeButton.style.position = "absolute";
-        closeButton.style.right = "2vw";
-        closeButton.style.top = "2vh";
-
-        closeButton.addEventListener("click", ()=>{
-            newPannel.classList.remove("open");
-            document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
-        });
-    }, 10);
+    setTimeout(() => panel.classList.add("open"), 10);
 }
 
-
+// ================== CLIC SUR LES ICONES ==================
 addable_content.forEach(element => {
     element.addEventListener("click", (event) => {
-        addable_content.forEach(event => event.classList.remove("active"));
-        const targeted_element = event.currentTarget;
-        targeted_element.classList.add("active");
+        addable_content.forEach(e => e.classList.remove("active"));
+        element.classList.add("active");
 
-        // récupérer l'image cliquée
-        let img;
-        if (event.target.tagName === "IMG") {
-            img = event.target;
-        } else {
-            img = targeted_element.querySelector("img");
+        const img = element.querySelector("img");
+        if (img && img.id) {
+            // Mapper l'id HTML vers l'id de configuration
+            let configId = img.id;
+            if (img.id === "hpertxtarea") {
+                configId = "hypertext";
+            }
+            createPannelFromId(configId);
         }
-
-        if (!img || !img.id) return;
-
-        createPannelFromId(img.id);
     });
 });
