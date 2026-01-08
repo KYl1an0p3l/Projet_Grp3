@@ -62,6 +62,7 @@ function renderPlacedList(){
         li.className = 'placed-item';
         li.dataset.id = item.id;
         li.textContent = `${item.type} #${idx+1}`;
+        li.style.color = "black";
 
         li.addEventListener('click', () => {
             selectPlacedItem(item.id);
@@ -249,8 +250,25 @@ function createPannelFromId(elemId, edited_element){
         }
         //Puis on le met en forme et on le place conformément aux choix de l'utilisateur
         newElement.style.position = "absolute";
-        newElement.style.left = Number(document.getElementById("posX").value) + "px";
-        newElement.style.top = Number(document.getElementById("posY").value) + "px";
+        canvas.getBoundingClientRect();
+        if(Number(document.getElementById("posX").value) + Number(document.getElementById("width").value) > canvas.clientWidth){
+            newElement.style.left = canvas.clientWidth - Number(document.getElementById("width").value) + "px";
+        }
+        else if(Number(document.getElementById("posX").value) < 0){
+            newElement.style.left = 0 + "px";
+        }
+        else{
+            newElement.style.left = Number(document.getElementById("posX").value) + "px";
+        }
+        if(Number(document.getElementById("posY").value) + Number(document.getElementById("height").value) > canvas.clientHeight){
+            newElement.style.top = canvas.clientHeight - Number(document.getElementById("height").value) + "px";
+        }
+        else if(Number(document.getElementById("posY").value) < 0){
+            newElement.style.top = 0 + "px";
+        }
+        else{
+            newElement.style.top = Number(document.getElementById("posY").value) + "px";
+        }
         newElement.style.height = Number(document.getElementById("height").value) + "px";
         newElement.style.width = Number(document.getElementById("width").value) + "px";
         newElement.style.zIndex = Number(document.getElementById("zindex").value);
