@@ -17,7 +17,10 @@ if (!fs.existsSync(PAGES_DIR)) fs.mkdirSync(PAGES_DIR);
 
 // 1. Sauvegarder tout le projet (JSON)
 app.post('/save-project', (req, res) => {
-    fs.writeFileSync(`${req.body.title}.json`, JSON.stringify(req.body, null, 2));
+
+    const filepath=path.join(path.join(__dirname, "saved projects"),`${req.body.title}.json`)
+
+    fs.writeFileSync(filepath, JSON.stringify(req.body, null, 2));
     res.send({ status: "Projet sauvegardé" });
 });
 
