@@ -383,3 +383,34 @@ async function saveData() {
     alert("Projet sauvegardé !");
 }
 
+// Bouton Nouveau Projet
+const btnNew = document.getElementById("btn_new");
+
+if (btnNew) {
+    btnNew.addEventListener("click", () => {
+        // 1. Petite sécurité pour ne pas tout perdre par erreur
+        if (nodes.length > 0) {
+            const confirmNew = confirm("Créer un nouveau projet ? \n(Les modifications non sauvegardées du projet actuel seront effacées de l'écran)");
+            if (!confirmNew) return;
+        }
+
+        // 2. On vide les variables en mémoire
+        nodes = [];
+        links = [];
+        selectedNodeId = null;
+
+        // 3. On vide les champs de texte
+        document.getElementById('input_project_name').value = "";
+        document.getElementById('input-name').value = "";
+        document.getElementById('input-desc').value = "";
+
+        // 4. IMPORTANT : On nettoie la sauvegarde automatique
+        // Sinon, si l'utilisateur fait F5, l'ancien projet reviendrait !
+        sessionStorage.removeItem('uwu_autosave');
+
+        // 5. On rafraîchit l'affichage (qui sera donc vide)
+        renderNodes();
+        
+        console.log("✨ Nouveau projet vierge créé !");
+    });
+}
