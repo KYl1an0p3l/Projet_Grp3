@@ -1,0 +1,15 @@
+{
+  "id": 1767724722975,
+  "created_at": 1767724722983,
+  "blocks": [
+    {
+      "type": "link-button",
+      "props": {
+        "x": 127,
+        "y": 70
+      },
+      "html": "<div class=\"nav-block\" style=\"position: absolute; left: 127px; top: 70px; z-index: 10; padding: 10px; background: white; border: 2px solid #3b82f6; border-radius: 8px;\">\n                    <p style=\"margin:0 0 5px 0; font-size: 14px; font-weight:bold;\">Vers : karot</p>\n                    <a href=\"1767724727740.html\" class=\"nav-btn\" style=\"background:#3b82f6; color:white; padding:5px 10px; text-decoration:none; border-radius:4px; font-size:12px;\">Go ➤</a>\n                   </div>"
+    }
+  ],
+  "name": "powah"
+}
