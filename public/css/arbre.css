@@ -1,5 +1,8 @@
+/* --- 1. CSS : Le Style --- */
+        #main-container{
+            flex-direction: row-reverse;
+        }
 
-        /* --- 1. CSS : Le Style --- */
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
@@ -9,25 +12,86 @@
             overflow: hidden;
         }
 
-        /* Barre d'outils en haut */
-        #toolbar {
-            background: #f0f0f0;
-            padding: 10px;
-            border-bottom: 2px solid #ccc;
+/* Barre d'outils en haut */
+#toolbar {
+    background: #e0f2ff;
+    padding: 10px 20px;
+    border-bottom: 2px solid #d1ebfc;
+    display: flex;
+    
+    /* MODIFICATION ICI */
+    justify-content: flex-start; /* Aligne tout vers la gauche */
+    gap: 30px;                   /* Crée un espacement cohérent entre le groupe de gauche et les boutons */
+    
+    align-items: center;
+}
+
+        .toolbar-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .toolbar-right {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
-        button {
-            padding: 8px 15px;
-            cursor: pointer;
-            border: 1px solid #999;
-            background: #fff;
-            border-radius: 4px;
+
+        .toolbar-right button {
+            height: 100px;          /* ⬅️ même hauteur que les icônes */
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            background: #ede9fe;          /* violet clair */
+            border: 1px solid #c4b5fd;
+            color: #4c1d95; 
+        }
+        
+
+        .toolbar-right button {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        
+        .header_element{
+            width: 120px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #d5dada;
+            border-radius: 16px;
+            
+        }
+        
+        .header_element:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
 
-        button:hover { background: #e0e0e0; }
-        button.active { background: #bfdbfe; border-color: #3b82f6; }
+
+        .header_element img{
+            width:56px;
+            height:56px;
+            object-fit:contain;
+            display:block;
+        }
+
+        .header_label{
+            margin:0;
+            padding:0;
+            font-size:16px;
+            font-weight:600;
+            color:#2b2b2b;
+        }
+
+        
 
         /* Conteneur principal */
         #main-container {
@@ -91,27 +155,64 @@
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
         }
 
-        /* Sidebar à droite */
+        /* Sidebar à gauche */
         #sidebar {
             width: 250px;
-            background: #f9f9f9;
-            border-left: 2px solid #ccc;
+            background: #e0f2ff;
+            border-right: 2px solid #b6e3ff;
             padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+        
+        #sidebar > div,
+        #sidebar .sidebar-group {
+            background: #f7f8fa;
+            padding: 12px;
+            border-radius: 8px;
         }
 
         .sidebar-group {
             display: flex;
             flex-direction: column;
         }
+
+
+        #sidebar input,
+        #sidebar textarea {
+            border: 1px solid #c4b5fd;
+            background: #f5f3ff;
+            color: #4c1d95;
+        }
         
+        #sidebar > div:empty {
+            display: none;
+        }
+        
+
         input, textarea {
             padding: 8px;
             margin-top: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
+
+        /* Boutons */
+
+        button {
+            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            background: linear-gradient(#ffffff, #f1f1f1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #e8f0ff;
+            border-color: #2563eb;
+        }
+
 
         h3 { margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
