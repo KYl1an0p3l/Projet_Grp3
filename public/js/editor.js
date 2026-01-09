@@ -526,3 +526,4 @@ function rehydratePlacedElements() {//Fonction de réhydratation
 
     renderPlacedList();
 }
+
