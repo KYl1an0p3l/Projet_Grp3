@@ -199,7 +199,6 @@ function createPannelFromId(elemId, edited_element){
         if(textInput) textInput.value = text;
         if(linkInput) linkInput.value = link;
     }
-    newPannel.addEventListener("click", e => e.stopPropagation());
 
     addButton.addEventListener("click", (event) => {
         event.stopPropagation();
