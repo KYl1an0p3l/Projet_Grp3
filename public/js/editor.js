@@ -53,6 +53,17 @@ const pannelNeedsForId = {
     }
 };
 
+canvas.addEventListener("click", (event) => {
+    const el = event.target.closest(".placed_element");
+    if (!el) return;
+
+    event.stopPropagation();
+
+    selectPlacedItem(el.dataset.id);
+    createPannelFromId(el.dataset.type, el);
+});
+
+
 function renderPlacedList(){
     const ul = document.getElementById('placed-items');
     if(!ul) return;
@@ -341,11 +352,13 @@ if (pageId) {
             // On l'injecte dans la zone d'édition (canvas)
             const canvas = document.getElementById("main_center");
             canvas.innerHTML = existingContent;
+            
+            rehydratePlacedElements();//Et on réhydrate
 
             // Optionnel : Si tu veux rendre les anciens éléments "cliquables" pour l'édition,
             // il faudrait rajouter ici une logique pour leur remettre les écouteurs d'événements.
             // Mais pour l'instant, ça suffit pour voir le bouton et ne pas le perdre !
-        })
+        })    
         .catch(err => console.error("Impossible de charger la page :", err));
 } else {
     alert("Pas d'ID de page fourni !");
@@ -354,7 +367,7 @@ if (pageId) {
 // --- 2. BOUTON DE SAUVEGARDE (À AJOUTER À LA FIN) ---
 
 const saveBtn = document.createElement('button');
-saveBtn.textContent = "💾 Sauvegarder la Page";
+saveBtn.textContent = "Sauvegarder la Page";
 // Petit style pour le placer en bas à droite
 saveBtn.style.cssText = "position: fixed; bottom: 20px; right: 20px; padding: 15px; background: #27ae60; color: white; border: none; font-size: 16px; cursor: pointer; z-index: 1000; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);";
 
@@ -408,18 +421,18 @@ saveBtn.onclick = () => {
     })
     .then(res => res.json())
     .then(data => {
-        alert("✅ Page sauvegardée avec succès !");
+        alert("Page sauvegardée avec succès !");
     })
     .catch(err => {
         console.error(err);
-        alert("❌ Erreur lors de la sauvegarde.");
+        alert("Erreur lors de la sauvegarde.");
     });
 };
 
 // --- 3. BOUTON SAUVEGARDER ET QUITTER (À AJOUTER À LA FIN) ---
 
 const saveAndExitBtn = document.createElement('button');
-saveAndExitBtn.textContent = "↩️ Sauvegarder et Retour";
+saveAndExitBtn.textContent = "Sauvegarder et Retour";
 // On le place à gauche du bouton Sauvegarder
 saveAndExitBtn.style.cssText = "position: fixed; bottom: 20px; right: 240px; padding: 15px; background: #34495e; color: white; border: none; font-size: 16px; cursor: pointer; z-index: 1000; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);";
 
@@ -485,12 +498,35 @@ saveAndExitBtn.onclick = () => {
     });
 };
 
-document.querySelectorAll(".placed_element").forEach(item => {
-    item.addEventListener("click", (event) => {
-        event.stopPropagation();
-        item.style.border = "2px solid gray";
-        selectPlacedItem(item.dataset.id);
-        createPannelFromId(item.dataset.type, item);
+function rehydratePlacedElements() {//Fonction de réhydratation
+    placedItems.length = 0;
+
+    document.querySelectorAll(".placed_element").forEach(el => {
+
+        // 1. ID
+        if (!el.dataset.id) {
+            el.dataset.id = crypto.randomUUID();
+        }
+
+        // 2. TYPE
+        if (!el.dataset.type) {
+            if (el.tagName === "P") el.dataset.type = "textarea";
+            else if (el.tagName === "IMG") el.dataset.type = "imgarea";
+            else if (el.tagName === "A") el.dataset.type = "hypertext";
+        }
+
+        // 3. Bordure invisible par défaut
+        el.style.border = "transparent solid 2px";
+
+        // 4. Ajout à la liste
+        placedItems.push({
+            id: el.dataset.id,
+            type: el.dataset.type
+        });
     });
-});
+
+    renderPlacedList();
+}
+
+
 setTimeout(() => {document.querySelectorAll(".placed_element").forEach(item => addPlacedItemToList(item));},10);
