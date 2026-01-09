@@ -58,6 +58,7 @@ canvas.addEventListener("click", (event) => {
     if (!el) return;
 
     event.stopPropagation();
+    el.style.border = "gray solid 2px";
 
     selectPlacedItem(el.dataset.id);
     createPannelFromId(el.dataset.type, el);
@@ -284,19 +285,6 @@ function createPannelFromId(elemId, edited_element){
         newElement.style.width = Number(document.getElementById("width").value) + "px";
         newElement.style.zIndex = Number(document.getElementById("zindex").value);
         newElement.classList.add("placed_element");
-
-        if(edited_element){
-            const target = edited_element;
-            if(elemId === "textarea"){
-                target.textContent = document.getElementById("text").value;
-            }
-            target.style.position = "absolute";
-            target.style.left = document.getElementById("posX").value + "px";
-            target.style.top = document.getElementById("posY").value + "px";
-            target.style.width = document.getElementById("width").value + "px";
-            target.style.height = document.getElementById("height").value + "px";
-            target.style.zIndex = document.getElementById("zindex").value;
-        }
 
         newPannel.classList.remove("open");
         document.querySelectorAll(".header_element").forEach(elem => elem.classList.remove("active"));
