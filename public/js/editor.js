@@ -53,17 +53,6 @@ const pannelNeedsForId = {
     }
 };
 
-canvas.addEventListener("click", (event) => {
-    const el = event.target.closest(".placed_element");
-    if (!el) return;
-
-    event.stopPropagation();
-    el.style.border = "gray solid 2px";
-
-    selectPlacedItem(el.dataset.id);
-    createPannelFromId(el.dataset.type, el);
-});
-
 
 function renderPlacedList(){
     const ul = document.getElementById('placed-items');
@@ -525,6 +514,13 @@ function rehydratePlacedElements() {//Fonction de réhydratation
         placedItems.push({
             id: el.dataset.id,
             type: el.dataset.type
+        });
+        // 5. Réassocier le clic pour ouvrir le panneau
+        el.addEventListener("click", (event) => {
+            event.stopPropagation();
+            el.style.border = "gray solid 2px";
+            selectPlacedItem(el.dataset.id);
+            createPannelFromId(el.dataset.type, el);
         });
     });
 
