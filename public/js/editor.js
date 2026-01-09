@@ -174,7 +174,7 @@ function createPannelFromId(elemId, edited_element){
     addButton.textContent = edited_element ? 'Enregistrer' : 'Ajouter';
     newPannel.appendChild(addButton);
 
-    if(edited_element){//On récupère les données de l'élément sélectionné pour remplir les champs avec ses donnés
+    if(edited_element){//On récupère les données de l'élément sélectionné pour remplir les champs avec ses données
         const left = parseInt(edited_element.style.left) || edited_element.offsetLeft || 0;
         const top = parseInt(edited_element.style.top) || edited_element.offsetTop || 0;
         const z = edited_element.style.zIndex || 0;
@@ -199,8 +199,11 @@ function createPannelFromId(elemId, edited_element){
         if(textInput) textInput.value = text;
         if(linkInput) linkInput.value = link;
     }
+    newPannel.addEventListener("click", e => e.stopPropagation());
 
     addButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        console.log("CLICK ENREGISTRER", edited_element);
         let newElement = null;
         if(elemId === "textarea"){
             newElement = document.createElement("p");
@@ -528,4 +531,3 @@ function rehydratePlacedElements() {//Fonction de réhydratation
 
     renderPlacedList();
 }
-
